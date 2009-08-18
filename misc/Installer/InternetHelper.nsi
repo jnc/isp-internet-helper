@@ -197,9 +197,11 @@ SectionEnd
 
 Section /o "Запускать при старте Windows" SecStartup
 
+  WriteRegDWORD HKCU "Software\REAL\Internet Helper\Startup" "AutoStart" 0x1
+
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
 
-    CreateShortCut "$SMSTARTUP\Интернет-Помощник ${VENDORL}.lnk" "$INSTDIR\InternetHelper.exe"
+    CreateShortCut "$SMSTARTUP\Интернет-Помощник ${VENDORL}.lnk" "$INSTDIR\InternetHelper.exe" "--minimize"
   
   !insertmacro MUI_STARTMENU_WRITE_END
 

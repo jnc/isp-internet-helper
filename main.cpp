@@ -53,12 +53,37 @@ bool IHApp::OnInit()
 	m_MainFrame = new IHFrame(NULL, wxID_ANY, L"Интернет-Помощник", wxDefaultPosition, wxSize(600, 500));
 
 	m_MainFrame->Centre();
-	m_MainFrame->Show(true);
+
+	// show main frame, if not minimized
+	//
+
+	if (m_ShowMainFrame)
+		m_MainFrame->Show(true);
 
     return true;
 }
 
+void IHApp::OnInitCmdLine(wxCmdLineParser &parser)
+{
+	static const wxCmdLineEntryDesc cmdLineDesc[] = 
+	{
+		{ wxCMD_LINE_SWITCH,	L"m",	L"minimize",	L"start minimized to tray" },
+		{ wxCMD_LINE_SWITCH,	L"v",	L"verbose",		L"be verbose" },
+		{ wxCMD_LINE_NONE }
+	};
 
+	parser.SetDesc(cmdLineDesc);
+}
+
+bool IHApp::OnCmdLineParsed(wxCmdLineParser &parser)
+{
+	if (!wxApp::OnCmdLineParsed(parser))
+		return false;
+
+	m_ShowMainFrame = !parser.Found(L"minimize");
+
+	return true;
+}
 
 // ----------------------------------------------------------------------------
 // main frame
@@ -187,7 +212,7 @@ IHFrame::IHFrame(wxWindow * parent,
 
 		if (login.Length() == 0 || password.Length() == 0)
 		{
-			wxSettingsDialog dlg(this, &m_Config);
+			wxSettingsDialog dlg(this, &m_Config, ID_SETTINGS_ACCOUNT);
 
 			if (dlg.ShowModal() == wxID_OK)
 			{
@@ -469,7 +494,7 @@ void IHFrame::OnAccountInformationChanged(wxCommandEvent & WXUNUSED(event))
 
 void IHFrame::OnSettings(wxCommandEvent & WXUNUSED(event))
 {
-	wxSettingsDialog dlg(this, &m_Config);
+	wxSettingsDialog dlg(this, &m_Config, ID_SETTINGS_ACCOUNT);
 
 	if (dlg.ShowModal() == wxID_OK)
 	{

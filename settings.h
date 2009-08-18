@@ -7,7 +7,7 @@
 class wxSettingsDialog : public wxDialog
 {
 public:
-   wxSettingsDialog(wxWindow *parent, wxConfig *cfg);
+   wxSettingsDialog(wxWindow *parent, wxConfig *cfg, int page_id);
 
    void OnOK(wxCommandEvent &event);
 
@@ -26,7 +26,15 @@ private:
 	int							 m_PendingPaymentCheckInterval,
 								 m_PendingPaymentAdvanceInterval;
 
+	bool						 m_StartupAutoStart;
+
 	void AddAccountPage();
+	void AddStartupPage();
+
+	void CreateLink();
+	void RemoveLink();
+
+	wxString GetLinkPath() const;
 
 	DECLARE_EVENT_TABLE()
 	DECLARE_DYNAMIC_CLASS(wxSettingsDialog)

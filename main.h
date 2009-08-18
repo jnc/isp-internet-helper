@@ -12,6 +12,7 @@
 #include <wx/hyperlink.h>
 #include <wx/aboutdlg.h>
 #include <wx/config.h>
+#include <wx/cmdline.h>
 
 #include "interfaces.h"
 #include "routes.h"
@@ -28,8 +29,12 @@ class IHApp : public wxApp
 {
 	IHFrame				*m_MainFrame;
 
+	bool				 m_ShowMainFrame;
+
 public:
     virtual bool OnInit();
+	virtual bool OnCmdLineParsed(wxCmdLineParser &parser);
+	virtual void OnInitCmdLine(wxCmdLineParser &parser);
 
 	IHFrame *GetMainFrame() { return m_MainFrame; };
 };

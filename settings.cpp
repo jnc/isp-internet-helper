@@ -4,8 +4,14 @@
 #	include "wx/wx.h"
 #endif
 
+#include <shlobj.h>
+
+#include <wx/valgen.h>
+#include <wx/filename.h>
+
 #include "main.h"
 #include "settings.h"
+#include "defines.h"
 
 // wxSettingsDialog
 //
@@ -16,7 +22,7 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(wxSettingsDialog, wxDialog)
 
-wxSettingsDialog::wxSettingsDialog(wxWindow *parent, wxConfig *cfg)
+wxSettingsDialog::wxSettingsDialog(wxWindow *parent, wxConfig *cfg, int page_id)
 				: wxDialog(parent, wxID_ANY, _("Настройки"), wxDefaultPosition, wxSize(550, 450),
 						   wxDEFAULT_DIALOG_STYLE),
 				  m_Config(cfg)
@@ -31,8 +37,12 @@ wxSettingsDialog::wxSettingsDialog(wxWindow *parent, wxConfig *cfg)
 	cfg->Read(L"/Account/PasswordClear", &m_AccountPassword, L"");
 	cfg->Read(L"/Account/PendingPaymentCheckInterval", &m_PendingPaymentCheckInterval, 60);
 	cfg->Read(L"/Account/PendingPaymentAdvanceInterval", &m_PendingPaymentAdvanceInterval, 3);
-
 	AddAccountPage();
+
+	cfg->Read(L"/Startup/AutoStart", &m_StartupAutoStart, false);
+	AddStartupPage();
+
+	m_Notebook->SetSelection(ID_SETTINGS_ACCOUNT - page_id);
 }
 
 void wxSettingsDialog::AddAccountPage()
@@ -81,6 +91,32 @@ void wxSettingsDialog::AddAccountPage()
 	m_Notebook->AddPage(panel, L"Состояние Счёта");
 }
 
+void wxSettingsDialog::AddStartupPage()
+{
+	wxPanel *panel = new wxPanel(m_Notebook, wxID_ANY);
+	wxPoint current(15, 15), shift(0, 20);
+	wxSize psize;
+	wxString status;
+
+	psize = m_Notebook->GetClientSize();
+
+	new wxCheckBox(panel, wxID_ANY, L"Запускать Интернет-Помощник при входе в Windows", current, wxDefaultSize, 0, 
+		wxGenericValidator(&m_StartupAutoStart));
+
+	current.y = psize.GetY() - 140;
+
+	new wxStaticText(panel, wxID_ANY, 
+		L"Следует иметь ввиду, что Интернет-Помощник запустится автоматически только\n"
+		L"если войти в Windows под текущим пользователем. Для запуска Интернет-Помощника\n"
+		L"под другим пользователем, выполните настройку Интернет-Помощника под ним.", current);
+	
+	(new wxButton(panel, wxID_OK, _("OK"), wxPoint(psize.GetX() - 200, psize.GetY() - 65)))->SetDefault();
+	new wxButton(panel, wxID_CANCEL, _("Отмена"), wxPoint(psize.GetX() - 100, psize.GetY() - 65));
+
+	m_Notebook->AddPage(panel, L"Автозапуск");
+}
+
+
 void wxSettingsDialog::OnOK(wxCommandEvent & WXUNUSED(event))
 {
 	if (Validate() && TransferDataFromWindow())
@@ -93,7 +129,123 @@ void wxSettingsDialog::OnOK(wxCommandEvent & WXUNUSED(event))
 		m_Config->Write(L"/Account/PendingPaymentCheckInterval", m_PendingPaymentCheckInterval);
 		m_Config->Write(L"/Account/PendingPaymentAdvanceInterval", m_PendingPaymentAdvanceInterval);
 
+		m_Config->Write(L"/Startup/AutoStart", m_StartupAutoStart);
+
+		if (m_StartupAutoStart)
+			CreateLink();
+		else
+			RemoveLink();
+
 		EndModal(wxID_OK);
 	}
 }
 
+void wxSettingsDialog::CreateLink()
+{
+	wxString app_path, link;
+	wxChar *pszAppPath;
+	bool rc = true;
+
+	// get ours placement
+	//
+
+	pszAppPath = app_path.GetWriteBuf(MAX_PATH);
+	pszAppPath[0] = 0;
+
+	if ((link = GetLinkPath()).Length() == 0 ||
+		::GetModuleFileName(NULL, pszAppPath, MAX_PATH) == 0)
+	{
+		app_path.UngetWriteBuf();
+
+		wxMessageDialog(this, 
+						L"Ошибка создания ярлыка", 
+						L"Не удалось создать ярлык Интернет-Помощника в папке Автозапуска Windows.").ShowModal();
+
+		return;
+	}
+
+	app_path.UngetWriteBuf();
+
+	// create link, if not exists
+	//
+
+	if (::wxFileExists(link))
+		return;
+
+	HRESULT hres;
+	IShellLink *isl = NULL;
+
+	hres = ::CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (LPVOID *)&isl);
+
+	if (SUCCEEDED(hres) && isl != NULL)
+	{
+		IPersistFile *ipf = NULL;
+
+		if (SUCCEEDED(isl->SetPath(app_path.c_str())) &&
+			SUCCEEDED(isl->SetDescription(IHNAMEL)) &&
+			SUCCEEDED(isl->SetArguments(L"--minimize")) &&
+			SUCCEEDED(isl->SetWorkingDirectory(wxFileName(app_path).GetPath().c_str())))
+		{
+			hres = isl->QueryInterface(IID_IPersistFile, (LPVOID *)&ipf);
+
+			if (SUCCEEDED(hres) && ipf != NULL)
+			{
+				ipf->Save(link.c_str(), true);
+				ipf->Release();
+			}
+			else
+			{
+				rc = false;
+			}
+		}
+		else
+		{
+			rc = false;
+		}
+
+		isl->Release();
+	}
+	else
+	{
+		rc = false;
+	}
+
+	if (!rc)
+	{
+		wxMessageDialog(this, 
+						L"Ошибка создания ярлыка", 
+						L"Не удалось создать ярлык Интернет-Помощника в папке Автозапуска Windows.").ShowModal();
+	}
+}
+
+void wxSettingsDialog::RemoveLink()
+{
+	wxString link = GetLinkPath();
+
+	if (::wxFileExists(link))
+		::wxRemoveFile(link);
+}
+
+
+wxString wxSettingsDialog::GetLinkPath() const
+{
+	wxString startup_folder, link;
+	wxChar *pszStartupFolder;
+
+	pszStartupFolder = startup_folder.GetWriteBuf(MAX_PATH);
+	pszStartupFolder[0] = 0;
+
+	if (::SHGetSpecialFolderPath((HWND)GetHWND(), pszStartupFolder, CSIDL_STARTUP, FALSE) == FALSE)
+	{
+		startup_folder.UngetWriteBuf();
+		return L"";
+	}
+
+	startup_folder.UngetWriteBuf();
+
+	link  = startup_folder + L"\\";
+	link += IHNAMEL;
+	link += L".lnk";
+
+	return link;
+}
