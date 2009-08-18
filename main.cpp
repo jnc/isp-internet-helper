@@ -6,7 +6,7 @@
 
 #include "main.h"
 #include "defines.h"
-#include "account.h"
+#include "settings.h"
 #include "version.h"
 
 #include <wx/protocol/http.h>
