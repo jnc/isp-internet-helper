@@ -192,15 +192,31 @@ Section /o "Ярлык на Рабочем Столе" SecDesktopIcon
 
 SectionEnd
 
+  ; Windows startup section
+  ;
+
+Section /o "Запускать при старте Windows" SecStartup
+
+  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+
+    CreateShortCut "$SMSTARTUP\Интернет-Помощник ${VENDORL}.lnk" "$INSTDIR\InternetHelper.exe"
+  
+  !insertmacro MUI_STARTMENU_WRITE_END
+
+SectionEnd
+
+
   ; descriptions
   ;
 
   LangString DESC_SecHelperFiles ${LANG_RUSSIAN} "Файлы Интернет-Помощника."
   LangString DESC_SecDesktopIcon ${LANG_RUSSIAN} "Создаёт ярлык на Рабочем Столе."
+  LangString DESC_SecStartup ${LANG_RUSSIAN} "Включает автозапуск при старте Windows."
 
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${SecHelperFiles} $(DESC_SecHelperFiles)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecDesktopIcon} $(DESC_SecDesktopIcon)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecStartup} $(DESC_SecStartup)
   !insertmacro MUI_FUNCTION_DESCRIPTION_END
  
   ; uninstaller
@@ -222,6 +238,7 @@ Section "Uninstall"
   !insertmacro MUI_STARTMENU_GETFOLDER Application $StartMenuFolder
     
   Delete "$SMPROGRAMS\$StartMenuFolder\Интернет-Помощник ${VENDORL}.lnk"
+  Delete "$SMSTARTUP\Интернет-Помощник ${VENDORL}.lnk"
   Delete "$DESKTOP\Интернет-Помощник ${VENDORL}.lnk"
   RMDir "$SMPROGRAMS\$StartMenuFolder"
 
