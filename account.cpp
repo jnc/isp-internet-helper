@@ -147,6 +147,33 @@ void IHFrame::OnAccountSelected()
 						 wxID_ANY, 
 						 (m_UpdateThread->GetAccountBlockStatus() == 0) ? L"разблокирован" : L"заблокирован",
 						 current + shift);
+
+		if (m_UpdateThread->GetPendingPaymentServices().Length() != 0)
+		{
+			current.y += 40;
+
+			text = new wxStaticText(panel, wxID_ANY, L"Платёж до:", current); text->SetFont(bold);
+			new wxStaticText(panel, 
+							 wxID_ANY, 
+							 wxString::Format(L"%s, %s", 
+											  m_UpdateThread->GetPendingPaymentDateTime().FormatDate(),
+											  m_UpdateThread->GetPendingPaymentDateTime().FormatTime()),
+							 current + shift);
+
+			current.y += 20;
+
+			new wxStaticText(panel, 
+							 wxID_ANY, 
+							 m_UpdateThread->GetPendingPaymentServices(),
+							 current + shift);
+
+			current.y += 20;
+
+			new wxStaticText(panel, 
+							 wxID_ANY, 
+							 wxString::Format(L"%.2f руб.", m_UpdateThread->GetPendingPaymentSum()),
+							 current + shift);
+		}
 	}
 	else
 	{

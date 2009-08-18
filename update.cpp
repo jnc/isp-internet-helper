@@ -166,7 +166,7 @@ void wxUpdateThread::CheckAccountState()
 					unsigned long dttm;
 					time_t dttm_t;
 
-					child->GetNodeContent().ToULong(&dttm); dttm_t = dttm;
+					child->GetNodeContent().ToULong(&dttm); dttm_t = dttm - 1;
 					m_PendingPaymentDateTime = wxDateTime(dttm_t);
 				}
 				else if (child->GetName() == L"disc-cost")

@@ -24,6 +24,7 @@ IHTaskBarIcon::IHTaskBarIcon()
 void IHTaskBarIcon::OnDoubleClick(wxTaskBarIconEvent & WXUNUSED(event))
 {
 	m_MainFrame->Show();
+	m_MainFrame->Iconize(false);
 }
 
 wxMenu *IHTaskBarIcon::CreatePopupMenu()
@@ -70,6 +71,7 @@ void IHTaskBarIcon::ShowBalloonNotification(wxString title, wxString info)
 void IHTaskBarIcon::OnShow(wxCommandEvent & WXUNUSED(event))
 {
 	m_MainFrame->Show();
+	m_MainFrame->Iconize(false);
 }
 
 void IHTaskBarIcon::OnQuit(wxCommandEvent & WXUNUSED(event))

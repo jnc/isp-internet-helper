@@ -25,6 +25,7 @@ BEGIN_EVENT_TABLE(IHFrame, wxFrame)
 	EVT_BUTTON(ID_TRACEROUTE, IHFrame::OnTraceroute)
 	EVT_TREE_SEL_CHANGED(ID_INFO_TREE, IHFrame::OnTreeSelChanged)
 	EVT_IDLE(IHFrame::OnIdle)
+	EVT_ICONIZE(IHFrame::OnIconize)
 END_EVENT_TABLE()
 
 IMPLEMENT_APP(IHApp)
@@ -561,4 +562,9 @@ void IHFrame::OnClose(wxCloseEvent &event)
 		m_TaskBarIcon.RemoveIcon();
 		wxFrame::OnCloseWindow(event);
 	}
+}
+
+void IHFrame::OnIconize(wxIconizeEvent &event)
+{
+	Show(!event.Iconized());
 }

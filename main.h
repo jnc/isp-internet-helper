@@ -13,15 +13,6 @@
 #include <wx/aboutdlg.h>
 #include <wx/config.h>
 
-#include "copy.xpm"
-#include "cut.xpm"
-#include "fileopen.xpm"
-#include "filesave.xpm"
-#include "find.xpm"
-#include "htmfoldr.xpm"
-#include "new.xpm"
-#include "wxwin16x16.xpm"
-
 #include "interfaces.h"
 #include "routes.h"
 #include "diagnosis.h"
@@ -117,6 +108,7 @@ public:
 	void OnSettings(wxCommandEvent &event);
 	void OnIdle(wxIdleEvent &event);
 	void OnClose(wxCloseEvent &event);
+	void OnIconize(wxIconizeEvent &event);
 
     DECLARE_EVENT_TABLE()
 };
