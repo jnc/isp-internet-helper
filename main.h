@@ -85,6 +85,10 @@ class IHFrame : public wxFrame
 	void OnRootSelected();
 	void OnAccountSelected();
 
+	void Upgrade();
+
+	void UpgradeClearPassword();
+
 	DECLARE_DYNAMIC_CLASS(IHFrame)
 
 public:

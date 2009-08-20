@@ -214,6 +214,14 @@
 				RelativePath=".\update.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\upgrade.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\utils.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -258,6 +266,10 @@
 			</File>
 			<File
 				RelativePath=".\update.h"
+				>
+			</File>
+			<File
+				RelativePath=".\utils.h"
 				>
 			</File>
 			<File

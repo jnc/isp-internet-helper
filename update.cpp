@@ -123,7 +123,7 @@ void wxUpdateThread::CheckAccountState()
 	wxString request;
 
 	m_Mutex.Lock();
-	request = wxString::Format(L"/helper/check-account.php?login=%s&password_clear=%s",
+	request = wxString::Format(L"/helper/check-account.php?login=%s&password=%s",
 		m_AccountLogin,
 		m_AccountPassword);
 	m_Mutex.Unlock();

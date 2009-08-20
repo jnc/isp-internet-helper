@@ -228,6 +228,7 @@ void IHFrame::OnDiagnosisSelected()
 	wxIPV4address ipv4_address;
 	double loss;
 	unsigned int rtt;
+	wxColour colour;
 
 	this->QueryAddressing(progress);
 
@@ -241,19 +242,31 @@ void IHFrame::OnDiagnosisSelected()
 	bold.SetWeight(wxFONTWEIGHT_BOLD);
 	text->SetFont(bold);
 
+	colour = wxTheColourDatabase->Find(L"BLUE");
+
 	if (m_Diagnosis.Ping(m_DefaultGateway, 1000, 5, &loss, &rtt))
 	{
 		if (loss > 0.0)
+		{
 			status = wxString::Format(L"проблема (%.0f%% потерь, %d мс)", loss, rtt);
+
+			if (loss == 100.0)
+				colour = wxTheColourDatabase->Find(L"RED");
+			else
+				colour = wxTheColourDatabase->Find(L"BROWN");
+		}
 		else
+		{
 			status = wxString::Format(L"доступен (0%% потерь, %d мс)", rtt);
+		}
 	}
 	else
 	{
 		status = L"проблема (системна€ ошибка)";
+		colour = wxTheColourDatabase->Find(L"RED");
 	}
 
-	new wxStaticText(panel, wxID_ANY, status, current + shift);
+	(new wxStaticText(panel, wxID_ANY, status, current + shift))->SetForegroundColour(colour);
 
 	// ping DNS servers
 	//
@@ -269,22 +282,32 @@ void IHFrame::OnDiagnosisSelected()
 			for (size_t j = 0; j < m_Interfaces[i].GetDNSCount(); j++)
 			{
 				current.y += 20;
+
 				text = new wxStaticText(panel, wxID_ANY, wxString::Format(L"ƒоступность DNS-сервера (%d):", j), 
 					current); text->SetFont(bold);
+				colour = wxTheColourDatabase->Find(L"BLUE");
 
 				if (m_Diagnosis.Ping(m_Interfaces[i].GetDNS(j), 1000, 5, &loss, &rtt))
 				{
 					if (loss > 0.0)
+					{
 						status = wxString::Format(L"проблема (%.0f%% потерь, %d мс)", loss, rtt);
+
+						if (loss == 100.0)
+							colour = wxTheColourDatabase->Find(L"RED");
+						else
+							colour = wxTheColourDatabase->Find(L"BROWN");
+					}
 					else
 						status = wxString::Format(L"доступен (0%% потерь, %d мс)", rtt);
 				}
 				else
 				{
 					status = L"проблема (системна€ ошибка)";
+					colour = wxTheColourDatabase->Find(L"RED");
 				}
 
-				new wxStaticText(panel, wxID_ANY, status, current + shift);
+				(new wxStaticText(panel, wxID_ANY, status, current + shift))->SetForegroundColour(colour);
 			}
 		}
 	}
@@ -297,13 +320,19 @@ void IHFrame::OnDiagnosisSelected()
 	progress.Pulse(L"ѕроверка работы DNS-серверов (системный метод)...");
 
 	text = new wxStaticText(panel, wxID_ANY, L"–абота DNS-серверов (метод 1):", current); text->SetFont(bold);
+	colour = wxTheColourDatabase->Find(L"BLUE");
 
 	if (ipv4_address.Hostname(L"ya.ru"))
+	{
 		status = L"работает";
+	}
 	else
+	{
 		status = L"не работает";
+		colour = wxTheColourDatabase->Find(L"RED");
+	}
 
-	new wxStaticText(panel, wxID_ANY, status, current + shift);
+	(new wxStaticText(panel, wxID_ANY, status, current + shift))->SetForegroundColour(colour);
 
 	// test Internet reachability
 	//
@@ -313,20 +342,29 @@ void IHFrame::OnDiagnosisSelected()
 	progress.Pulse(L"ѕроверка доступности »нтернет (ya.ru)...");
 
 	text = new wxStaticText(panel, wxID_ANY, L"ƒоступность »нтернет (ya.ru):", current); text->SetFont(bold);
+	colour = wxTheColourDatabase->Find(L"BLUE");
 
 	if (m_Diagnosis.Ping(ipv4_address.IPAddress(), 1000, 5, &loss, &rtt))
 	{
 		if (loss > 0.0)
+		{
 			status = wxString::Format(L"проблема (%.0f%% потерь, %d мс)", loss, rtt);
+
+			if (loss == 100.0)
+				colour = wxTheColourDatabase->Find(L"RED");
+			else
+				colour = wxTheColourDatabase->Find(L"BROWN");
+		}
 		else
 			status = wxString::Format(L"доступен (0%% потерь, %d мс)", rtt);
 	}
 	else
 	{
 		status = L"проблема (системна€ ошибка)";
+		colour = wxTheColourDatabase->Find(L"RED");
 	}
 
-	new wxStaticText(panel, wxID_ANY, status, current + shift);
+	(new wxStaticText(panel, wxID_ANY, status, current + shift))->SetForegroundColour(colour);
 
 	// traceroute
 	//

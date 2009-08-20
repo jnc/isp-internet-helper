@@ -12,6 +12,7 @@
 #include "main.h"
 #include "settings.h"
 #include "defines.h"
+#include "utils.h"
 
 // wxSettingsDialog
 //
@@ -34,7 +35,6 @@ wxSettingsDialog::wxSettingsDialog(wxWindow *parent, wxConfig *cfg, int page_id)
 		wxAUI_NB_TOP | wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
 
 	cfg->Read(L"/Account/Login", &m_AccountLogin, L"");
-	cfg->Read(L"/Account/PasswordClear", &m_AccountPassword, L"");
 	cfg->Read(L"/Account/PendingPaymentCheckInterval", &m_PendingPaymentCheckInterval, 60);
 	cfg->Read(L"/Account/PendingPaymentAdvanceInterval", &m_PendingPaymentAdvanceInterval, 3);
 	AddAccountPage();
@@ -125,9 +125,14 @@ void wxSettingsDialog::OnOK(wxCommandEvent & WXUNUSED(event))
 		m_PendingPaymentAdvanceInterval = m_PendingPaymentAdvanceIntervalCtrl->GetValue();
 
 		m_Config->Write(L"/Account/Login", m_AccountLogin);
-		m_Config->Write(L"/Account/PasswordClear", m_AccountPassword);
 		m_Config->Write(L"/Account/PendingPaymentCheckInterval", m_PendingPaymentCheckInterval);
 		m_Config->Write(L"/Account/PendingPaymentAdvanceInterval", m_PendingPaymentAdvanceInterval);
+
+		if (m_AccountPassword.Length() != 0)
+		{
+			m_Config->Write(L"/Account/Password", 
+				IHUtils::GetMD5(wxString::Format(L"InternetHelper%scan'tcrackthis", m_AccountPassword)));
+		}
 
 		m_Config->Write(L"/Startup/AutoStart", m_StartupAutoStart);
 

@@ -8,6 +8,7 @@
 #include "defines.h"
 #include "settings.h"
 #include "version.h"
+#include "utils.h"
 
 #include <wx/protocol/http.h>
 #include <wx/filename.h>
@@ -198,6 +199,11 @@ IHFrame::IHFrame(wxWindow * parent,
 		}
 	}
 
+	// upgrade configuration data, if needed
+	//
+
+	Upgrade();
+
 	// start update thread
 	//
 
@@ -208,7 +214,7 @@ IHFrame::IHFrame(wxWindow * parent,
 		m_LastPendingPaymentCheck = wxDateTime::Now() - wxTimeSpan::Minutes(1440);
 
 		m_Config.Read(L"/Account/Login", &login, L"");
-		m_Config.Read(L"/Account/PasswordClear", &password, L"");
+		m_Config.Read(L"/Account/Password", &password, L"");
 
 		if (login.Length() == 0 || password.Length() == 0)
 		{
@@ -217,7 +223,7 @@ IHFrame::IHFrame(wxWindow * parent,
 			if (dlg.ShowModal() == wxID_OK)
 			{
 				m_Config.Read(L"/Account/Login", &login, L"");
-				m_Config.Read(L"/Account/PasswordClear", &password, L"");
+				m_Config.Read(L"/Account/Password", &password, L"");
 			}
 		}
 
@@ -501,7 +507,7 @@ void IHFrame::OnSettings(wxCommandEvent & WXUNUSED(event))
 		wxString login, password;
 
 		m_Config.Read(L"/Account/Login", &login, L"");
-		m_Config.Read(L"/Account/PasswordClear", &password, L"");
+		m_Config.Read(L"/Account/Password", &password, L"");
 
 		m_UpdateThread->SetAccountLogin(login);
 		m_UpdateThread->SetAccountPassword(password);
